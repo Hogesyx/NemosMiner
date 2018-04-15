@@ -128,34 +128,7 @@ Function NPMCycle {
     }
 
     #Activate or deactivate donation
-    if ((Get-Date).AddDays(-1).AddMinutes($Config.Donate) -ge $Variables.LastDonated -and $Variables.DonateRandom.wallet -eq $Null) {
-        # Get donation addresses randomly from agreed devs list
-        # This will fairly distribute donations to Devs
-        # Devs list and wallets is publicly available at: http://nemosminer.x10host.com/devlist.json 
-        try {$Donation = Invoke-WebRequest "http://nemosminer.x10host.com/devlist.json" -UseBasicParsing -Headers @{"Cache-Control" = "no-cache"} | ConvertFrom-Json
-        }
-        catch {$Donation = @([PSCustomObject]@{Name = "mrplus"; Wallet = "134bw4oTorEJUUVFhokDQDfNqTs7rBMNYy"; UserName = "mrplus"}, [PSCustomObject]@{Name = "nemo"; Wallet = "1QGADhdMRpp9Pk5u5zG1TrHKRrdK5R81TE"; UserName = "nemo"})
-        }
-        if ($Donation -ne $null) {
-            $Variables.DonateRandom = $Donation | Get-Random
-            $Config | Add-Member -Force @{PoolsConfig = [PSCustomObject]@{default = [PSCustomObject]@{Wallet = $Variables.DonateRandom.Wallet; UserName = $Variables.DonateRandom.UserName; WorkerName = "NPlusMiner"; PricePenaltyFactor = 1}}}
-        }
-    }
     if ((Get-Date).AddDays(-1) -ge $Variables.LastDonated -and $Variables.DonateRandom.Wallet -ne $Null) {
-        $Config | Add-Member -Force -MemberType ScriptProperty -Name "PoolsConfig" -Value {
-            If (Test-Path ".\Config\PoolsConfig.json") {
-                get-content ".\Config\PoolsConfig.json" | ConvertFrom-json
-            }
-            else {
-                [PSCustomObject]@{default = [PSCustomObject]@{
-                        Wallet      = "1QGADhdMRpp9Pk5u5zG1TrHKRrdK5R81TE"
-                        UserName    = "nemo"
-                        WorkerName  = "NemosMinerNoCfg"
-                        PoolPenalty = 1
-                    }
-                }
-            }
-        }
         $Variables.LastDonated = Get-Date
         $Variables.DonateRandom = [PSCustomObject]@{}
     }
